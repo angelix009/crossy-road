@@ -69,7 +69,7 @@ const PhantomWalletConnect = ({ onConnect }) => {
           style={styles.connectButton} 
           onPress={connectWallet}
         >
-          <Text style={styles.buttonText}>Connecter Phantom Wallet</Text>
+          <Text style={styles.buttonText}>Connect Phantom Wallet</Text>
         </TouchableOpacity>
       ) : (
         <View style={styles.connectedContainer}>

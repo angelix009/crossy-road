@@ -23,7 +23,7 @@ export default function PhantomConnect({ onConnect }) {
       {!connected ? (
         <TouchableOpacity style={styles.button} onPress={handleConnect}>
           <Text style={styles.buttonText}>
-            {isWeb ? "Connecter Phantom Wallet" : "Simuler Connexion Wallet"}
+            {isWeb ? "Connect Phantom Wallet" : "Simuler Connexion Wallet"}
           </Text>
         </TouchableOpacity>
       ) : (
