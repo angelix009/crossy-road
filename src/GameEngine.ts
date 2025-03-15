@@ -19,6 +19,9 @@ import {
   startingRow,
 } from "./GameSettings";
 
+// Facteur de normalisation de vitesse - ajustez cette valeur si le jeu est trop lent/rapide
+const SPEED_FACTOR = 1.0;
+
 const initialState = {
   id: Characters.brent.id,
   name: Characters.brent.name,
@@ -30,6 +33,9 @@ const normalizeAngle = (angle) => {
 };
 
 export default class Engine {
+  lastTime = 0;
+  deltaTime = 0;
+  
   updateScale = () => {
     const { width, height, scale } = Dimensions.get("window");
     if (this.camera) {
@@ -67,6 +73,10 @@ export default class Engine {
     this.scene.world.add(this._hero);
 
     this.scene.createParticles();
+    
+    // Initialiser le time
+    this.lastTime = Date.now();
+    this.deltaTime = 0;
   };
 
   isGameEnded() {
@@ -108,19 +118,27 @@ export default class Engine {
     this.gameMap.init();
 
     this.onGameReady();
+    
+    // Réinitialiser le time
+    this.lastTime = Date.now();
+    this.deltaTime = 0;
   };
 
   // Move scene forward
   forwardScene = () => {
+    // Utilisation du deltaTime pour normaliser la vitesse de la caméra
+    const cameraSpeed = CAMERA_EASING * this.deltaTime * 60;
+    const adjustedCameraEasing = Math.min(cameraSpeed, CAMERA_EASING);
+    
     this.scene.world.position.z -=
       (this._hero.position.z - startingRow + this.scene.world.position.z) *
-      CAMERA_EASING;
+      adjustedCameraEasing;
     this.scene.world.position.x = -Math.min(
       2,
       Math.max(
         -2,
         this.scene.world.position.x +
-          (this._hero.position.x - this.scene.world.position.x) * CAMERA_EASING
+          (this._hero.position.x - this.scene.world.position.x) * adjustedCameraEasing
       )
     );
 
@@ -142,14 +160,20 @@ export default class Engine {
     // this.props.setGameState(this.gameState);
   };
 
-  tick = (dt) => {
-    // this.drive();
+  tick = (time) => {
+    // Calculer le deltaTime
+    this.deltaTime = (time - this.lastTime) / 1000; // Convertir en secondes
+    this.lastTime = time;
+    
+    // Limiter le deltaTime pour éviter les sauts importants pendant les ralentissements
+    this.deltaTime = Math.min(this.deltaTime, 0.1) * SPEED_FACTOR;
 
-    this.gameMap.tick(dt, this._hero);
+    // this.drive();
+    this.gameMap.tick(this.deltaTime, this._hero);
 
     if (!this._hero.moving) {
-      this._hero.moveOnEntity();
-      this._hero.moveOnCar();
+      this._hero.moveOnEntity(this.deltaTime);
+      this._hero.moveOnCar(this.deltaTime);
       this.checkIfUserHasFallenOutOfFrame();
     }
     this.forwardScene();

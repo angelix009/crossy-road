@@ -79,7 +79,6 @@ class PlayerPositionAnimation extends TimelineMax {
 
 export default class CrossyPlayer extends Group {
   animations = [];
-
   _character;
 
   setCharacter(character) {
@@ -104,23 +103,27 @@ export default class CrossyPlayer extends Group {
     this.reset();
   }
 
-  moveOnEntity() {
+  // Ajout du deltaTime pour normaliser la vitesse
+  moveOnEntity(deltaTime = 1/60) {
     if (!this.ridingOn) {
       return;
     }
 
     // let target = this._hero.ridingOn.mesh.position.x + this._hero.ridingOnOffset;
-    this.position.x += this.ridingOn.speed;
+    // Utiliser deltaTime pour normaliser la vitesse par rapport au FPS
+    this.position.x += this.ridingOn.speed * deltaTime * 60; // Normaliser pour 60 FPS
     this.initialPosition.x = this.position.x;
   }
 
-  moveOnCar() {
+  // Ajout du deltaTime pour normaliser la vitesse
+  moveOnCar(deltaTime = 1/60) {
     if (!this.hitBy) {
       return;
     }
 
     let target = this.hitBy.mesh.position.x;
-    this.position.x += this.hitBy.speed;
+    // Utiliser deltaTime pour normaliser la vitesse par rapport au FPS
+    this.position.x += this.hitBy.speed * deltaTime * 60; // Normaliser pour 60 FPS
     if (this.initialPosition) this.initialPosition.x = target;
   }
 
