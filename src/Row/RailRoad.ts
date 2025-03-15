@@ -5,7 +5,7 @@ import AudioManager from "../AudioManager";
 import ModelLoader from "../ModelLoader";
 import { groundLevel } from "../GameSettings";
 
-const IS_MUTED = true;
+const IS_MUTED = false;
 export default class RailRoad extends Object3D {
   active = false;
 
