@@ -195,11 +195,15 @@ class Game extends Component {
     return (
       <View style={StyleSheet.absoluteFillObject}>
         <GameOverScreen
+          score={this.state.score}  // Assurez-vous de passer le score ici
           showSettings={() => {
             this.setState({ showSettings: true });
           }}
           setGameState={(state) => {
             this.updateWithGameState(state);
+          }}
+          onRestart={() => {
+            this.updateWithGameState(State.Game.none);
           }}
         />
       </View>

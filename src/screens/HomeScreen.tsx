@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Animated,
   Dimensions,
@@ -13,12 +13,30 @@ import { useSafeAreaInsets } from "react-native-safe-area-context";
 import Hand from "@/components/HandCTA";
 import Footer from "@/components/Home/Footer";
 import GameContext from "@/context/GameContext";
+import LeaderboardScreen from "./LeaderboardScreen";
+import { initLeaderboard } from "../services/LeaderboardService";
 
 let hasShownTitle = false;
 
 function Screen(props) {
   const { setCharacter, character } = React.useContext(GameContext);
   const animation = new Animated.Value(0);
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const [showCustomLeaderboard, setShowCustomLeaderboard] = useState(false);
+  const [currentScore, setCurrentScore] = useState(0);
+
+  // Initialiser le leaderboard au chargement
+  useEffect(() => {
+    const init = async () => {
+      try {
+        await initLeaderboard();
+      } catch (err) {
+        console.error('Erreur d\'initialisation leaderboard:', err);
+      }
+    };
+    
+    init();
+  }, []);
 
   React.useEffect(() => {
     function onKeyUp({ keyCode }) {
@@ -65,7 +83,14 @@ function Screen(props) {
       },
     ],
   };
-  // console.log(props);
+
+  // Récupérer le score actuel
+  useEffect(() => {
+    if (props.coins) {
+      setCurrentScore(props.coins);
+    }
+  }, [props.coins]);
+
   return (
     <View
       style={[
@@ -78,6 +103,38 @@ function Screen(props) {
         },
       ]}
     >
+      {showLeaderboard && (
+        <LeaderboardScreen 
+          onClose={() => setShowLeaderboard(false)}
+          currentScore={currentScore}
+        />
+      )}
+      
+      <TouchableOpacity
+        style={{
+          position: 'absolute',
+          top: 20 + top,
+          right: 20 + right,
+          backgroundColor: 'rgba(0,0,0,0.5)',
+          padding: 10,
+          borderRadius: 5,
+          zIndex: 100
+        }}
+        onPress={() => {
+          console.log("Ouverture du leaderboard personnalisé");
+          setShowCustomLeaderboard(true);
+        }}
+      >
+        <Text style={{ color: 'white' }}>Leaderboard</Text>
+      </TouchableOpacity>
+
+      {showCustomLeaderboard && (
+        <LeaderboardScreen 
+          onClose={() => setShowCustomLeaderboard(false)}
+          currentScore={currentScore}
+        />
+      )}
+
       <TouchableOpacity
         activeOpacity={1.0}
         style={[
@@ -119,11 +176,16 @@ function Screen(props) {
           </View>
           <Footer
             onCharacterSelect={() => {
-              // TODO(Bacon): Create a character select page
+              // Code existant de la sélection de personnage
             }}
             onShop={() => {}}
             onMultiplayer={() => {}}
             onCamera={() => {}}
+            onShowLeaderboard={() => {
+              console.log("Tentative d'affichage du leaderboard");
+              setShowLeaderboard(true);
+              console.log("ShowLeaderboard défini à:", true);
+            }}
           />
         </View>
       </TouchableOpacity>
@@ -141,10 +203,6 @@ const styles = StyleSheet.create({
     backgroundColor: "transparent",
   },
   title: {
-    // color: 'white',
-    // fontSize: 48,
-    // backgroundColor: 'transparent',
-    // textAlign: 'center',
     resizeMode: "contain",
     maxWidth: 600,
     width: "80%",

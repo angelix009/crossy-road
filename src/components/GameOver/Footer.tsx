@@ -6,6 +6,7 @@ import Colors from "@/Colors";
 import Images from "@/Images";
 import State from "@/state";
 import Button from "../Button";
+import { initLeaderboard } from "../../services/LeaderboardService";
 
 async function shareAsync() {
   await Share.share(
@@ -30,6 +31,11 @@ export default function Footer({
   showSettings,
   setGameState,
   navigation,
+  onShowLeaderboard,
+  onCharacterSelect,
+  onShop,
+  onMultiplayer,
+  onCamera
 }) {
   const [canShare, setCanShare] = useState(true);
 
@@ -37,6 +43,11 @@ export default function Footer({
     isAvailableAsync()
       .then(setCanShare)
       .catch(() => {});
+    
+    // Initialiser la base de données du leaderboard
+    initLeaderboard().catch(err => 
+      console.error('Erreur d\'initialisation leaderboard:', err)
+    );
   }, []);
 
   LayoutAnimation.easeInEaseOut();
@@ -45,7 +56,9 @@ export default function Footer({
     <View style={[styles.container, style]}>
       <Button
         onPress={() => {
-          showSettings();
+          if (showSettings) {
+            showSettings();
+          }
         }}
         imageStyle={[styles.button, { aspectRatio: 1.25 }]}
         source={Images.button.settings}
@@ -59,7 +72,9 @@ export default function Footer({
       )}
       <Button
         onPress={() => {
-          setGameState(State.Game.none);
+          if (setGameState) {
+            setGameState(State.Game.none);
+          }
         }}
         imageStyle={[
           styles.button,
@@ -68,12 +83,19 @@ export default function Footer({
         source={Images.button.long_play}
       />
       <Button
-        onPress={() => {
-          console.log("Game Center"); //TODO: Add GC
-        }}
-        imageStyle={[styles.button, { aspectRatio: 1.25 }]}
-        source={Images.button.rank}
-      />
+  onPress={() => {
+    console.log("Bouton leaderboard cliqué");
+    console.log("onShowLeaderboard existe?", !!onShowLeaderboard);
+    if (onShowLeaderboard) {
+      console.log("Appel de onShowLeaderboard");
+      onShowLeaderboard();
+    } else {
+      console.log("Leaderboard non implémenté");
+    }
+  }}
+  imageStyle={[styles.button, { aspectRatio: 1.25 }]}
+  source={Images.button.rank}
+/>
     </View>
   );
 }

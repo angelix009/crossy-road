@@ -4,6 +4,7 @@ import { ScrollView, StyleSheet, Text, View } from "react-native";
 import { Slot } from "expo-router";
 
 import GameProvider from "../context/GameProvider";
+import { WalletProvider } from "../context/WalletContext";  // Importez le WalletProvider
 import AudioManager from "@/AudioManager";
 import { useResolvedValue } from "@/hooks/useResolvedValue";
 import ModelLoader from "@/ModelLoader";
@@ -11,9 +12,11 @@ import ModelLoader from "@/ModelLoader";
 export default function App() {
   return (
     <AssetLoading>
-      <GameProvider>
-        <Slot />
-      </GameProvider>
+      <WalletProvider>  {/* Ajoutez le WalletProvider ici, avant GameProvider */}
+        <GameProvider>
+          <Slot />
+        </GameProvider>
+      </WalletProvider>
     </AssetLoading>
   );
 }

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import {
   Alert,
   Animated,
@@ -6,6 +6,8 @@ import {
   StyleSheet,
   useWindowDimensions,
   View,
+  TouchableOpacity,
+  Text,
 } from "react-native";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 
@@ -14,85 +16,94 @@ import Footer from "@/components/GameOver/Footer";
 import AudioManager from "@/AudioManager";
 import Characters from "@/Characters";
 import Images from "@/Images";
+import { useWallet } from "@/context/WalletContext";
+import { saveScore } from "@/services/LeaderboardService";
+import LeaderboardScreen from "./LeaderboardScreen";
 
-// import { setGameState } from '../src/actions/game';
-
-//TODO: Make this dynamic
-const banner = [
-  {
-    color: "#3640eb",
-    title: "Get Updates Subscribe Now",
-    button: {
-      onPress: (_) => {
-        Alert.alert(
-          "Subscribe to our mailing list",
-          "Join our mailing list and discover the latest news from Expo and Evan Bacon.\n\n Read our privacy policy on https://github.com/EvanBacon/Expo-Crossy-Road/privacy.md",
-          [
-            { text: "Cancel", onPress: () => console.log("Cancel Pressed!") },
-            { text: "OK", onPress: () => console.log("OK Pressed!") },
-          ],
-          {
-            cancelable: false,
-          }
-        );
-      },
-      source: Images.button.mail,
-      style: { aspectRatio: 1.85, height: 40 },
-    },
-  },
-  {
-    color: "#368FEB",
-    title: "Free Gift in 2h 51m",
-  },
-  {
-    color: "#36D6EB",
-    title: "44 Coins To Go",
-  },
+// Définition initiale de la structure du banner pour les animations
+const initialBanners = [
+  { color: "#3640eb" },
+  { color: "#368FEB" },
+  { color: "#36D6EB" }
 ];
 
-// const AnimatedBanner = Animated.createAnimatedComponent(Banner);
-
-function GameOver({ ...props }) {
+function GameOver({ setGameState, showSettings, onRestart, score = 0 }) {
   const { width } = useWindowDimensions();
-  const [currentIndex, setCurrentIndex] = React.useState(0);
-  const [characters, setCharacters] = React.useState(
+  const [currentIndex, setCurrentIndex] = useState(0);
+  const [characters, setCharacters] = useState(
     Object.keys(Characters).map((val) => Characters[val])
   );
-  const [animations, setAnimations] = React.useState(
-    banner.map((val) => new Animated.Value(0))
+  
+  // Utilisez initialBanners pour les animations au lieu de banner
+  const [animations, setAnimations] = useState(
+    initialBanners.map((val) => new Animated.Value(0))
   );
+  
+  const [showLeaderboard, setShowLeaderboard] = useState(false);
+  const { connected, walletAddress } = useWallet();
+  const [scoreSaved, setScoreSaved] = useState(false);
+
+  // Définir le contenu du banner après les hooks useState
+  const banner = [
+    {
+      color: "#3640eb",
+      title: `Score: ${score}`,
+      button: {
+        onPress: () => setShowLeaderboard(true),
+        source: Images.button.mail,
+        style: { aspectRatio: 1.85, height: 40 },
+      },
+    },
+    {
+      color: "#368FEB",
+      title: connected ? `Wallet connecté` : "Connectez votre wallet",
+    },
+    {
+      color: "#36D6EB",
+      title: scoreSaved ? "Score enregistré" : "Classez-vous !",
+    },
+  ];
+
+  // Auto-save score if wallet is connected
+  useEffect(() => {
+    const autoSaveScore = async () => {
+      if (connected && walletAddress && score > 0 && !scoreSaved) {
+        try {
+          console.log("Tentative de sauvegarde du score:", score);
+          const result = await saveScore(walletAddress, score);
+          setScoreSaved(true);
+          console.log("Résultat de la sauvegarde:", result);
+        } catch (error) {
+          console.error("Erreur lors de la sauvegarde du score:", error);
+        }
+      }
+    };
+
+    autoSaveScore();
+  }, [connected, walletAddress, score, scoreSaved]);
 
   const dismiss = () => {
-    // props.navigation.goBack();
-    props.onRestart();
+    onRestart();
   };
 
   const pickRandom = () => {
     const randomIndex = Math.floor(Math.random() * (characters.length - 1));
     const randomCharacter = characters[randomIndex];
-    // props.setCharacter(randomCharacter);
     dismiss();
   };
 
-  React.useEffect(() => {
+  useEffect(() => {
     setTimeout(() => {
       _animateBanners();
 
       const playBannerSound = async () => {
         await AudioManager.playAsync(AudioManager.sounds.banner);
-        // const soundObject = new Audio.Sound();
-        // try {
-        //   await soundObject.loadAsync(AudioFiles.banner);
-        //   await soundObject.playAsync();
-        // } catch (error) {
-        //   console.warn('sound error', { error });
-        // }
       };
       playBannerSound();
       setTimeout(() => playBannerSound(), 300);
       setTimeout(() => playBannerSound(), 600);
     }, 600);
-  });
+  }, []);
 
   const _animateBanners = () => {
     const _animations = animations.map((animation) =>
@@ -106,33 +117,25 @@ function GameOver({ ...props }) {
     Animated.stagger(300, _animations).start();
   };
 
-  const _showResult = (result) => {
-    // if (result.action === Share.sharedAction) {
-    //   if (result.activityType) {
-    //     this.setState({result: 'shared with an activityType: ' + result.activityType});
-    //   } else {
-    //     this.setState({result: 'shared'});
-    //   }
-    // } else if (result.action === Share.dismissedAction) {
-    //   this.setState({result: 'dismissed'});
-    // }
-  };
-
   const select = () => {
-    // props.setCharacter(characters[currentIndex]);
     dismiss();
   };
 
-  const { top, bottom, left, right } = useSafeAreaInsets();
+  const handleShowLeaderboard = () => {
+    setShowLeaderboard(true);
+  };
 
-  const imageStyle = { width: 60, height: 48 };
+  const handleCloseLeaderboard = () => {
+    setShowLeaderboard(false);
+  };
+
+  const { top, bottom, left, right } = useSafeAreaInsets();
 
   return (
     <View
       style={[
         styles.container,
         { paddingTop: top || 12, paddingBottom: bottom || 8 },
-        props.style,
       ]}
     >
       <View key="content" style={{ flex: 1, justifyContent: "center" }}>
@@ -160,14 +163,27 @@ function GameOver({ ...props }) {
             button={val.button}
           />
         ))}
+
+        <TouchableOpacity
+          style={styles.leaderboardButton}
+          onPress={handleShowLeaderboard}
+        >
+          <Text style={styles.leaderboardText}>Voir le Leaderboard</Text>
+        </TouchableOpacity>
       </View>
 
       <Footer
         style={{ paddingLeft: left || 4, paddingRight: right || 4 }}
-        showSettings={props.showSettings}
-        setGameState={props.setGameState}
-        navigation={props.navigation}
+        showSettings={showSettings}
+        setGameState={setGameState}
       />
+
+      {showLeaderboard && (
+        <LeaderboardScreen
+          onClose={handleCloseLeaderboard}
+          currentScore={score}
+        />
+      )}
     </View>
   );
 }
@@ -186,5 +202,18 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     textAlign: "center",
     color: "#34495e",
+  },
+  leaderboardButton: {
+    backgroundColor: "#9945FF",
+    padding: 12,
+    borderRadius: 5,
+    alignItems: "center",
+    marginHorizontal: 50,
+    marginTop: 20,
+  },
+  leaderboardText: {
+    fontFamily: "retro",
+    color: "white",
+    fontSize: 18,
   },
 });
