@@ -75,7 +75,7 @@ export default function LeaderboardScreen({ onClose, currentScore = 0 }) {
           
           {!connected ? (
             <View style={styles.connectSection}>
-              <Text style={styles.instructionText}>Connectez votre wallet pour sauvegarder le score</Text>
+              <Text style={styles.instructionText}>Connect you wallet to save your score</Text>
               <PhantomConnect onConnect={handleWalletConnect} />
             </View>
           ) : (

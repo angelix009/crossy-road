@@ -74,7 +74,7 @@ const PhantomWalletConnect = ({ onConnect }) => {
       ) : (
         <View style={styles.connectedContainer}>
           <Text style={styles.connectedText}>
-            Connecté: {publicKey?.slice(0, 4)}...{publicKey?.slice(-4)}
+            Connected: {publicKey?.slice(0, 4)}...{publicKey?.slice(-4)}
           </Text>
           <TouchableOpacity 
             style={styles.disconnectButton} 

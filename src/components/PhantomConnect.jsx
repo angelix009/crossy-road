@@ -29,7 +29,7 @@ export default function PhantomConnect({ onConnect }) {
       ) : (
         <View style={styles.connectedContainer}>
           <Text style={styles.connectedText}>
-            Connecté: {walletAddress?.slice(0, 4)}...{walletAddress?.slice(-4)}
+            Connected: {walletAddress?.slice(0, 4)}...{walletAddress?.slice(-4)}
           </Text>
           <TouchableOpacity style={styles.disconnectButton} onPress={handleDisconnect}>
             <Text style={styles.disconnectText}>Déconnecter</Text>

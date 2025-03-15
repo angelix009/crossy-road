@@ -56,11 +56,11 @@ function GameOver({ setGameState, showSettings, onRestart, score = 0 }) {
     },
     {
       color: "#368FEB",
-      title: connected ? `Wallet connecté` : "Connectez votre wallet",
+      title: connected ? `Wallet connected` : "Connect your wallet",
     },
     {
       color: "#36D6EB",
-      title: scoreSaved ? "Score enregistré" : "Classez-vous !",
+      title: scoreSaved ? "Score saved" : "Be in the Leaderboard",
     },
   ];
 
@@ -168,7 +168,7 @@ function GameOver({ setGameState, showSettings, onRestart, score = 0 }) {
           style={styles.leaderboardButton}
           onPress={handleShowLeaderboard}
         >
-          <Text style={styles.leaderboardText}>Voir le Leaderboard</Text>
+          <Text style={styles.leaderboardText}>Check the Leaderboard</Text>
         </TouchableOpacity>
       </View>
 
