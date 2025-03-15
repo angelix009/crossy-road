@@ -169,14 +169,14 @@ export default class Water extends Object3D {
       this.entities.map((entity) =>
         this.shouldCheckCollision({ dt, player, entity })
       );
-      this.shouldCheckHazardCollision({ player });
+      this.shouldCheckHazardCollision({ player, dt });
     }
   };
 
   move = ({ dt, player, entity }) => {
     const offset = 11;
 
-    entity.mesh.position.x += entity.speed;
+    entity.mesh.position.x += entity.speed * dt * 60; // Normaliser pour 60 FPS
 
     if (entity.mesh.position.x > offset && entity.speed > 0) {
       entity.mesh.position.x = -offset;
@@ -203,22 +203,22 @@ export default class Water extends Object3D {
     return Math.sin(this.sineCount) * 0.08 - 0.2;
   };
 
-  shouldCheckHazardCollision = ({ player }) => {
+  shouldCheckHazardCollision = ({ player, dt }) => { // Ajoutez dt comme paramètre
     if (Math.round(player.position.z) === this.position.z && !player.moving) {
       if (!player.ridingOn) {
         if (player.isAlive) {
           this.onCollide(this.floor, "water");
         } else {
           let y = this.getPlayerSunkenPosition();
-          this.sineCount += this.sineInc;
+          this.sineCount += this.sineInc * dt * 60; // Normaliser l'incrémentation aussi
           player.position.y = y;
-          player.rotation.y += 0.01;
-
-          player.position.x += this.entities[0].speed;
+          player.rotation.y += 0.01 * dt * 60; // Normaliser la rotation
+  
+          player.position.x += this.entities[0].speed * dt * 60; // Normaliser la vitesse
         }
       }
     }
-  };
+  }
 
   getCollisionLog = (position) => {
     for (const entity of this.entities) {

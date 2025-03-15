@@ -160,17 +160,13 @@ export default class Engine {
     // this.props.setGameState(this.gameState);
   };
 
-  tick = (time) => {
-    // Calculer le deltaTime
-    this.deltaTime = (time - this.lastTime) / 1000; // Convertir en secondes
-    this.lastTime = time;
-    
-    // Limiter le deltaTime pour éviter les sauts importants pendant les ralentissements
-    this.deltaTime = Math.min(this.deltaTime, 0.1) * SPEED_FACTOR;
-
+  tick = (dt) => {
+    // Utiliser directement le deltaTime calculé dans unpause
+    this.deltaTime = dt;
+  
     // this.drive();
     this.gameMap.tick(this.deltaTime, this._hero);
-
+  
     if (!this._hero.moving) {
       this._hero.moveOnEntity(this.deltaTime);
       this._hero.moveOnCar(this.deltaTime);
@@ -202,12 +198,21 @@ export default class Engine {
   }
 
   unpause() {
+    let lastFrameTime = Date.now();
+    
     const render = () => {
       this.raf = requestAnimationFrame(render);
-      const time = Date.now();
-      this.tick(time);
+      const currentTime = Date.now();
+      const deltaTime = (currentTime - lastFrameTime) / 1000; // Convertir en secondes
+      lastFrameTime = currentTime;
+      
+      // Limiter deltaTime pour éviter les sauts importants
+      const dt = Math.min(deltaTime, 0.1) * SPEED_FACTOR;
+      
+      // Utiliser dt au lieu de currentTime
+      this.tick(dt);
       this.renderer.render(this.scene, this.camera);
-
+  
       // NOTE: At the end of each frame, notify `Expo.GLView` with the below
       this.renderer.__gl.endFrameEXP();
     };

@@ -82,7 +82,7 @@ export default class RailRoad extends Object3D {
     const { train } = this;
     const offset = 22 * 5;
 
-    train.mesh.position.x += train.speed;
+    train.mesh.position.x += train.speed * dt * 60;
 
     if (train.mesh.position.x > offset && train.speed > 0) {
       train.mesh.position.x = -offset;

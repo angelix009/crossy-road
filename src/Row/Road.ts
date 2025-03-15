@@ -87,9 +87,10 @@ export default class Road extends Object3D {
   drive = ({ dt, player, car }) => {
     const { hitBy } = player;
     const offset = 11;
-
-    car.mesh.position.x += car.speed;
-
+  
+    // Modifiez cette ligne pour utiliser le deltaTime
+    car.mesh.position.x += car.speed * dt * 60; // Normaliser pour 60 FPS
+  
     if (car.mesh.position.x > offset && car.speed > 0) {
       car.mesh.position.x = -offset;
       if (car === hitBy) {
