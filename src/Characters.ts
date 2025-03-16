@@ -1,8 +1,8 @@
 export default {
-  // chicken: {
-  //   name: 'Chicken',
-  //   id: 'chicken',
-  // },
+   chicken: {
+     name: 'Chicken',
+     id: 'chicken',
+  },
   bacon: {
     name: "Bacon",
     id: "bacon"
